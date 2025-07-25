@@ -1,12 +1,10 @@
 from flask import Flask, render_template, request
 import requests
 import os
-import json
 
 app = Flask(__name__)
 
-# Free and open LibreTranslate instance
-TRANSLATE_URL = 'https://translate.argosopentech.com/translate'
+TRANSLATE_URL = 'https://ftapi.pythonanywhere.com/translate'
 
 @app.route('/')
 def index():
@@ -14,36 +12,30 @@ def index():
 
 @app.route('/translate', methods=['POST'])
 def translate():
-    text = request.form['text']
-    target_lang = request.form['target_lang']
+    text = request.form.get('text', '')
+    target_lang = request.form.get('target_lang', 'en')
+    source_lang = 'auto'
     translated_text = ""
 
-    payload = {
-        'q': text,
-        'source': 'en',  # or 'auto' if you want auto-detection
-        'target': target_lang,
-        'format': 'text'
-    }
-
     try:
-        response = requests.post(
+        response = requests.get(
             TRANSLATE_URL,
-            headers={'Content-Type': 'application/json'},
-            data=json.dumps(payload)
+            params={
+                'text': text,
+                'sl': source_lang,
+                'dl': target_lang
+            }
         )
-
-        if response.status_code == 200:
-            data = response.json()
-            translated_text = data.get('translatedText', 'No translation found.')
-        else:
-            translated_text = f"Error: {response.status_code} - {response.text}"
+        response.raise_for_status()
+        json_response = response.json()
+        translated_text = json_response.get('translated_text') or json_response.get('translation') or "No translation found."
 
     except requests.exceptions.RequestException as e:
         translated_text = f"Network Error: {e}"
     except ValueError:
-        translated_text = "Error: Could not parse translation response."
+        translated_text = "Error: Unexpected response format."
 
-    return render_template('index.html', translated_text=translated_text, input_text=text)
+    return render_template('index.html', translated_text=translated_text)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
