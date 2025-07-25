@@ -6,18 +6,27 @@
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Bilingual Translator</h1>
-        <form id="translate-form">
-            <textarea name="text" placeholder="Enter text to translate" required></textarea>
-            <select name="target_lang">
-                <option value="en">English</option>
-                <option value="ig">Igbo</option>
-            </select>
-            <button type="submit">Translate</button>
-        </form>
-        <div id="result"></div>
+     <h1>Igbo ↔ English Translator</h1>
+
+    <form method="POST" action="/translate">
+        <label for="text">Enter text to translate:</label>
+        <textarea id="text" name="text" rows="4" required></textarea>
+
+        <label for="target_lang">Translate to:</label>
+        <select id="target_lang" name="target_lang" required>
+            <option value="ig">Igbo</option>
+            <option value="en">English</option>
+        </select>
+
+        <button type="submit">Translate</button>
+    </form>
+
+    {% if translated_text %}
+    <div class="result">
+        <h3>Translation: </h3>
+        <p>{{ translated_text }}</p>
     </div>
+    {% endif %}
     <script>
         document.getElementById('translate-form').onsubmit = async function(e) {
             e.preventDefault();
