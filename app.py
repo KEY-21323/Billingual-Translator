@@ -25,15 +25,21 @@ def translate():
 
     try:
         response = requests.post(
-    'https://libretranslate.com/translate',
-    headers={'Content-Type': 'application/json'},
-    data=json.dumps({
-        'q': text,
-        'source': source_lang,
-        'target': target_lang,
-        'format': 'text'
-    })
-)
+        'https://libretranslate.com/translate',
+        headers={'Content-Type': 'application/json'},
+        data=json.dumps({
+            'q': text,
+            'source': source_lang,
+            'target': target_lang,
+            'format': 'text'
+        })
+    )
+    response.raise_for_status()
+    translated_text = response.json()['translatedText']
+
+except requests.exceptions.RequestException as e:
+    translated_text = f"Error: {e}"
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
