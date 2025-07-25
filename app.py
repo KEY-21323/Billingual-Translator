@@ -5,7 +5,7 @@ import json
 
 app = Flask(__name__)
 
-# Use a more reliable LibreTranslate instance
+
 TRANSLATE_URL = 'https://libretranslate.de/translate'
 
 @app.route('/')
@@ -14,32 +14,36 @@ def index():
 
 @app.route('/translate', methods=['POST'])
 def translate():
-    text = request.form.get('text')
-    target_lang = request.form.get('target_lang')
+    text = request.form['text']
+    target_lang = request.form['target_lang']
     translated_text = ""
+
+    payload = {
+        'q': text,
+        'source': 'auto',
+        'target': target_lang,
+        'format': 'text'
+    }
 
     try:
         response = requests.post(
             TRANSLATE_URL,
             headers={'Content-Type': 'application/json'},
-            data=json.dumps({
-                'q': text,
-                'source': 'auto',
-                'target': target_lang,
-                'format': 'text'
-            })
+            data=json.dumps(payload)
         )
-        print("Status Code:", response.status_code)
-        print("Response:", response.text)
 
-        response.raise_for_status()
-        translated_text = response.json().get('translatedText', 'No translation returned.')
+        if response.status_code == 200:
+            data = response.json()
+            translated_text = data.get('translatedText', 'No translation found.')
+        else:
+            translated_text = f"Error: {response.status_code} - {response.text}"
 
     except requests.exceptions.RequestException as e:
-        print("Translation error:", e)
-        translated_text = f"Translation error: {e}"
+        translated_text = f"Network Error: {e}"
+    except ValueError:
+        translated_text = "Error: Could not parse translation response."
 
-    return render_template('index.html', translated_text=translated_text)
+    return render_template('index.html', translated_text=translated_text, input_text=text)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
