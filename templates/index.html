@@ -6,7 +6,8 @@
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-     <h1>Igbo ↔ English Translator</h1>
+     <div class="parent">
+         <h1>Igbo ↔ English Translator</h1>
 
     <form method="POST" action="/translate">
         <label for="text">Enter text to translate:</label>
@@ -21,6 +22,7 @@
         <button type="submit">Translate</button>
     </form>
 
+     </div>
     {% if translated_text %}
     <div class="result">
         <h3>Translation: </h3>
