@@ -1,12 +1,9 @@
 from flask import Flask, render_template, request
 import requests
 import os
-import json
 
 app = Flask(__name__)
-
-# A reliable LibreTranslate public instance
-TRANSLATE_URL = 'https://libretranslate.de/translate'
+TRANSLATE_URL = 'https://ftapi.pythonanywhere.com/translate'
 
 @app.route('/')
 def index():
@@ -14,37 +11,26 @@ def index():
 
 @app.route('/translate', methods=['POST'])
 def translate():
-    text = request.form['text']
+    text = request.form.get('text', '')
     target_lang = 'fr'  # French
-
     translated_text = ""
 
-    payload = {
-        'q': text,
-        'source': 'auto',
-        'target': target_lang,
-        'format': 'text'
-    }
-
     try:
-        response = requests.post(
+        response = requests.get(
             TRANSLATE_URL,
-            headers={'Content-Type': 'application/json'},
-            data=json.dumps(payload)
+            params={'text': text, 'dl': target_lang}
         )
+        response.raise_for_status()
+        data = response.json()
 
-        if response.status_code == 200:
-            data = response.json()
-            translated_text = data.get('translatedText', 'No translation found.')
-        else:
-            translated_text = f"Error: {response.status_code} - {response.text}"
+        translated_text = data.get('destination-text') or data.get('translation') or "No translation found"
 
     except requests.exceptions.RequestException as e:
         translated_text = f"Network Error: {e}"
     except ValueError:
-        translated_text = "Error: Could not parse translation response."
+        translated_text = "Error: Invalid response format."
 
-    return render_template('index.html', translated_text=translated_text, input_text=text)
+    return render_template('index.html', translated_text=translated_text)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
