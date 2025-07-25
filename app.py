@@ -1,10 +1,12 @@
 from flask import Flask, render_template, request
 import requests
 import os
+import json
 
 app = Flask(__name__)
 
-TRANSLATE_URL = 'https://ftapi.pythonanywhere.com/translate'
+# A reliable LibreTranslate public instance
+TRANSLATE_URL = 'https://libretranslate.de/translate'
 
 @app.route('/')
 def index():
@@ -12,30 +14,37 @@ def index():
 
 @app.route('/translate', methods=['POST'])
 def translate():
-    text = request.form.get('text', '')
-    target_lang = request.form.get('target_lang', 'en')
-    source_lang = 'auto'
+    text = request.form['text']
+    target_lang = 'fr'  # French
+
     translated_text = ""
 
+    payload = {
+        'q': text,
+        'source': 'auto',
+        'target': target_lang,
+        'format': 'text'
+    }
+
     try:
-        response = requests.get(
+        response = requests.post(
             TRANSLATE_URL,
-            params={
-                'text': text,
-                'sl': source_lang,
-                'dl': target_lang
-            }
+            headers={'Content-Type': 'application/json'},
+            data=json.dumps(payload)
         )
-        response.raise_for_status()
-        json_response = response.json()
-        translated_text = json_response.get('translated_text') or json_response.get('translation') or "No translation found."
+
+        if response.status_code == 200:
+            data = response.json()
+            translated_text = data.get('translatedText', 'No translation found.')
+        else:
+            translated_text = f"Error: {response.status_code} - {response.text}"
 
     except requests.exceptions.RequestException as e:
         translated_text = f"Network Error: {e}"
     except ValueError:
-        translated_text = "Error: Unexpected response format."
+        translated_text = "Error: Could not parse translation response."
 
-    return render_template('index.html', translated_text=translated_text)
+    return render_template('index.html', translated_text=translated_text, input_text=text)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
