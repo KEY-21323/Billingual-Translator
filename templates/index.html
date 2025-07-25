@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bilingual Translator</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Bilingual Translator</h1>
+        <form id="translate-form">
+            <textarea name="text" placeholder="Enter text to translate" required></textarea>
+            <select name="target_lang">
+                <option value="en">English</option>
+                <option value="ig">Igbo</option>
+            </select>
+            <button type="submit">Translate</button>
+        </form>
+        <div id="result"></div>
+    </div>
+    <script>
+        document.getElementById('translate-form').onsubmit = async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const response = await fetch('/translate', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            document.getElementById('result').innerText = result.translated_text || result.error;
+        };
+    </script>
+</body>
+</html>
