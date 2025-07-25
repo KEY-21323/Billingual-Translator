@@ -6,7 +6,7 @@ import json
 app = Flask(__name__)
 
 # Use a more reliable LibreTranslate instance
-TRANSLATE_URL = 'https://translate.argosopentech.com/translate'
+TRANSLATE_URL = 'https://libretranslate.de/translate'
 
 @app.route('/')
 def index():
