@@ -5,7 +5,8 @@ import json
 
 app = Flask(__name__)
 
-TRANSLATE_URL = 'https://libretranslate.com/translate'
+# Use a more reliable LibreTranslate instance
+TRANSLATE_URL = 'https://translate.argosopentech.com/translate'
 
 @app.route('/')
 def index():
@@ -13,8 +14,8 @@ def index():
 
 @app.route('/translate', methods=['POST'])
 def translate():
-    text = request.form['text']
-    target_lang = request.form['target_lang']
+    text = request.form.get('text')
+    target_lang = request.form.get('target_lang')
     translated_text = ""
 
     try:
@@ -28,11 +29,15 @@ def translate():
                 'format': 'text'
             })
         )
+        print("Status Code:", response.status_code)
+        print("Response:", response.text)
+
         response.raise_for_status()
-        translated_text = response.json()['translatedText']
+        translated_text = response.json().get('translatedText', 'No translation returned.')
 
     except requests.exceptions.RequestException as e:
-        translated_text = f"Error: {e}"
+        print("Translation error:", e)
+        translated_text = f"Translation error: {e}"
 
     return render_template('index.html', translated_text=translated_text)
 
