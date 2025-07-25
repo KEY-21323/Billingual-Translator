@@ -5,8 +5,8 @@ import json
 
 app = Flask(__name__)
 
-
-TRANSLATE_URL = 'https://translate.astian.org/translate'
+# Free and open LibreTranslate instance
+TRANSLATE_URL = 'https://translate.argosopentech.com/translate'
 
 @app.route('/')
 def index():
@@ -20,7 +20,7 @@ def translate():
 
     payload = {
         'q': text,
-        'source': 'auto',
+        'source': 'en',  # or 'auto' if you want auto-detection
         'target': target_lang,
         'format': 'text'
     }
