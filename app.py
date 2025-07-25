@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 import requests
 import os
+import json
 
 app = Flask(__name__)
 
@@ -23,13 +24,16 @@ def translate():
     }
 
     try:
-        response = requests.post(TRANSLATE_URL, data=payload)
-        response.raise_for_status()
-        translated_text = response.json()['translatedText']
-        return jsonify({'translated_text': translated_text})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
+        response = requests.post(
+    'https://libretranslate.com/translate',
+    headers={'Content-Type': 'application/json'},
+    data=json.dumps({
+        'q': text,
+        'source': source_lang,
+        'target': target_lang,
+        'format': 'text'
+    })
+)
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
