@@ -4,7 +4,7 @@ body {
     padding: 2rem;
 }
 .container {
-    background: white;
+    background: red;
     padding: 2rem;
     border-radius: 10px;
     max-width: 600px;
@@ -17,9 +17,21 @@ textarea {
     margin-bottom: 1rem;
 }
 button {
-    padding: 0.5rem 1rem;
-    background: #007BFF;
+    background-color: #0066cc; /* default */
     color: white;
     border: none;
     border-radius: 5px;
+    padding: 10px 15px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #0052a3; /* darker blue on hover */
+    color: red;
+}
+
+button:active {
+    background-color: #003d80; /* even darker on click */
 }
